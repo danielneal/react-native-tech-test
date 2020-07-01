@@ -1,8 +1,10 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { Suspense } from 'react';
-import { StyleSheet, TextInput, Text, View, SafeAreaView, ActivityIndicator } from 'react-native';
+import { StyleSheet, TextInput, Text, View, SafeAreaView, ActivityIndicator,ScrollView } from 'react-native';
 import * as style from "./style"
 import { request } from 'graphql-request'
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 
 import {
     RecoilRoot,
@@ -20,72 +22,82 @@ const textState = atom({
 const endpoint = "https://next.riverford.co.uk/graphql"
 
 const query = /* GraphQL */ `
-    query recipe_search($q: String!) {
-       recipe_search(q:$q) {
+    query recipe_search($q: String!,$page_size: Int) {
+       recipe_search(q:$q,page_size:$page_size) {
          total_hits
+         hits {
+            recipe {
+               name
+               media {
+                  uri
+               }
+            }
+
+         }
+}
        }
     }
   `
 
+
+function RecipeHit({recipe}) {
+        return <View style={{padding:style.s3}}>
+          <Text>{recipe.name }</Text>
+        </View>
+}
+
 function Input() {
     const [text, setText] = useRecoilState(textState);
-
     const onChange = (text) => {
-        console.log(text);
         setText(text);
     };
 
     return (
             <View>
-            <TextInput type="text" onChangeText={onChange} />
-            <Text>Echo: {text}</Text>
+            <TextInput style= {{padding:style.s3}} type="text" onChangeText={onChange} />
         </View>
     );
 }
 
-const charCountState = selector({
-    key: 'charCountState',
-    get: ({get}) => {
-        const text = get(textState);
-        return text.length;
-    },
-});
-
-const numberOfHitsState = selector({
-    key:`numberOfHitsState`,
+const hitsState = selector({
+    key:`hitsState`,
     get: async ({get}) => {
         const text = get(textState)
-        const result=await request(endpoint,query, {q:text})
-        console.log(result)
-        return result.recipe_search.total_hits
+        const result=await request(endpoint,query, {q:text,page_size:10})
+        return result.recipe_search.hits
     }
 })
 
-function CharacterCount() {
-    const count = useRecoilValue(charCountState);
-    return <Text>Character Count: {count}</Text>;
-}
 
 function QueryResults() {
-    const hits=useRecoilValue(numberOfHitsState)
-    return <Text>QueryHits{hits}</Text>
+    const hits=useRecoilValue(hitsState)
+    return <ScrollView>
+        {hits.map((hit)=><RecipeHit recipe={hit.recipe}/>)}
+    </ScrollView>
 }
 
 function Search() {
     return (
             <SafeAreaView>
             <Input />
-            <CharacterCount />
             <Suspense fallback={<ActivityIndicator/>}>
             <QueryResults/>
             </Suspense>
             </SafeAreaView>
     );
 }
+
+const Stack = createStackNavigator();
+
+
 export default function App() {
     return (
             <RecoilRoot>
-            <Search />
+            <NavigationContainer>
+            <Stack.Navigator>
+              <Stack.Screen name="Search" component={Search} />
+            </Stack.Navigator>
+            </NavigationContainer>
             </RecoilRoot>
     );
 }
