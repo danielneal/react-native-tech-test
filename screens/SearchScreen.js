@@ -1,17 +1,17 @@
-import { 
+import {
     Text,
     SafeAreaView,
     View,
     ActivityIndicator,
     ScrollView,
     Image,
-    TextInput, 
+    TextInput,
     TouchableOpacity} from 'react-native';
 import React, { Suspense } from 'react';
 import * as style from "../style"
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { textState,hitsState } from "../state"
+import { textState,hitsState,totalHitsState,resultsPageState} from "../state"
 import { useRecoilState,useRecoilValue } from "recoil"
 
 function RecipeHit({recipe}) {
@@ -20,9 +20,21 @@ function RecipeHit({recipe}) {
     return <TouchableOpacity key={recipe.slug}
     style={{padding:style.s3,flexDirection:"row"}}
     onPress={()=>navigation.navigate('Recipe',{slug:recipe.slug})}>
-        {image && <Image source={{uri:image.uri}} style={{width:style.s7,height:style.s7,marginRight:style.s3}}/>}
-        <Text style={{fontSize:style.f3}}>{recipe.name}</Text>
+        {image? <Image source={{uri:image.uri}} style={{width:style.s7,height:style.s7,marginRight:style.s3}}/>:
+        <View style={{width:style.s7,height:style.s7,backgroundColor:style.ui3,marginRight:style.s3}}/>}
+        <Text style={{fontSize:style.f3,width:0,flexGrow:1}}>{recipe.name}</Text>
         </TouchableOpacity>
+}
+
+function ResultsPager() {
+    const [page, setPage] = useRecoilState(resultsPageState)
+    const totalHits = useRecoilValue(totalHitsState)
+    return <View style={{height:200,backgroundColor:"pink",position:"absolute",left:0,bottom:0,flexDirection:"row"}}>
+             <TouchableOpacity onPress={()=>setPage(page-1)}><Text>Prev</Text></TouchableOpacity>
+             <Text>Page {page}</Text>
+             <Text>Showing {page*10} - {Math.min(totalHits,(page+1)*10)} of {totalHits}</Text>
+             <TouchableOpacity onPress={()=>setPage(page+1)}><Text>Next</Text></TouchableOpacity>
+           </View>
 }
 
 function Input() {
@@ -52,9 +64,12 @@ function QueryResults() {
         return <QueryEmptyState/>
     }
     else {
-    return <ScrollView>
-        {hits.map((hit)=><RecipeHit recipe={hit.recipe}/>)}
-        </ScrollView>
+    return <View style={{flexGrow:1}}>
+            <ScrollView style={{flexGrow:1}}>
+              {hits.map((hit)=><RecipeHit recipe={hit.recipe}/>)}
+            </ScrollView>
+            <ResultsPager/>
+           </View>
     }
 }
 

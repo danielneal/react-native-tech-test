@@ -8,8 +8,8 @@ import { request } from 'graphql-request'
 const endpoint = "https://next.riverford.co.uk/graphql"
 
 const searchQuery = /* GraphQL */ `
-    query recipe_search($q: String!,$page_size: Int) {
-       recipe_search(q:$q,page_size:$page_size) {
+    query recipe_search($q: String!,$page_size: Int,$page:Int) {
+       recipe_search(q:$q,page_size:$page_size,page:$page) {
          total_hits
          hits {
             recipe {
@@ -42,7 +42,12 @@ query recipe($slug: String!) {
               component
               steps
            }
+           serves
+           prep_time
+           cook_time
+           total_time
            name
+           notes
            media {
               height
               width
@@ -56,12 +61,34 @@ export const textState = atom({
     default: '', // default value (aka initial value)
 });
 
-export const hitsState = selector({
-    key:`hitsState`,
+export const resultsPageState = atom({
+    key:`resultsPageState`,
+    default:1
+})
+
+export const resultsState = selector({
+    key:`resultsState`,
     get: async ({get}) => {
         const text = get(textState)
-        const result=await request(endpoint,searchQuery, {q:text,page_size:10})
-        return result.recipe_search.hits
+        const page = get(resultsPageState)
+        const results=await request(endpoint,searchQuery, {q:text,page_size:10,page:page})
+        return results
+    }
+})
+
+export const hitsState = selector({
+    key:`hitsState`,
+    get: ({get}) => {
+        const results = get(resultsState)
+        return results.recipe_search.hits
+    }
+})
+
+export const totalHitsState = selector({
+    key:`totalHitsState`,
+    get: ({get}) => {
+        const results = get(resultsState)
+        return results.recipe_search.total_hits
     }
 })
 

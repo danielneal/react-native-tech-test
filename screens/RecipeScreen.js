@@ -8,6 +8,7 @@ import * as style from "../style"
 import React, { Suspense } from 'react';
 import { recipeState } from "../state"
 import { useRecoilValue } from "recoil"
+import { Ionicons } from '@expo/vector-icons'
 
 function RecipeIngredients({recipe}) {
     return recipe.ingredients.map((entry)=> {
@@ -33,13 +34,26 @@ function RecipeIntroduction({recipe}) {
     <Text style={{padding:style.s3,fontSize:style.f2}}>{recipe.introduction}</Text>
     </>
 }
+
+function RecipeServes ({recipe}) {
+    return <View style={{flexDirection:"row",justifyContent:"flex-end",alignItems:"center",padding:style.s3}}>
+          <Ionicons name="md-people" size={32} style={{marginRight:style.s3}}/>
+          <Text style={{fontSize:style.f2}}>Serves {recipe.serves}</Text>
+        </View>
+}
+
+function RecipeTitle({recipe}) {
+   return <Text style={{textAlign:"center",fontWeight:"bold",fontSize:style.f3,padding:style.s4}}>{recipe.name}</Text>
+
+}
 function Recipe({slug}) {
     const recipe=useRecoilValue(recipeState(slug)).recipe
     const dimensions=useWindowDimensions()
     const image=recipe.media.find((img)=>img.height<800 && img.height > 400)
     return <ScrollView>
-        <Text style={{fontSize:style.f3,padding:style.s3}}>{recipe.name}</Text>
+        <RecipeTitle recipe={recipe}/>
         {image && <Image source={{uri:image.uri}} style={{width:dimensions.width,height:dimensions.width}}/>}
+        <RecipeServes recipe={recipe}/>
         <RecipeIntroduction recipe={recipe}/>
         <RecipeIngredients recipe={recipe}/>
         <RecipeMethod recipe={recipe}/>

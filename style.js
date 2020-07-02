@@ -9,9 +9,11 @@ export const s7=64
 export const s8=128
 
 //colors
-export const primary="ffaaaa"
-export const secondary="#aaaaff"
-export const background="#eeeeee"
+export const ui1="#333333"
+export const ui2="#666666"
+export const ui3="#999999"
+export const ui4="#BBBBBB"
+
 
 //font sizes
 export const f1=14
