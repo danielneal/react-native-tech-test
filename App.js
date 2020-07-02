@@ -14,6 +14,7 @@ import { request } from 'graphql-request'
 import { NavigationContainer , useNavigation } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useWindowDimensions } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import {
     RecoilRoot,
@@ -115,11 +116,23 @@ const recipeState = selectorFamily({
 
 });
 
+function QueryEmptyState() {
+      return  <View style={{padding:style.s5,flex:1,padding:style.s4,justifyContent:"center",alignItems:"center"}}>
+                <MaterialCommunityIcons name="food-variant" size={128}/>
+                <Text style={{fontSize:style.f3}} textAlign="center">We have over 1000 recipes available to search, go ahead and type in the top bar to discover them.</Text>
+        </View>
+}
 function QueryResults() {
     const hits=useRecoilValue(hitsState)
+    const text=useRecoilValue(textState)
+    if(text==="") {
+        return <QueryEmptyState/>
+    }
+    else {
     return <ScrollView>
         {hits.map((hit)=><RecipeHit recipe={hit.recipe}/>)}
-    </ScrollView>
+        </ScrollView>
+    }
 }
 
 function Recipe({slug}) {
@@ -134,14 +147,14 @@ function Recipe({slug}) {
 }
 
 function RecipeScreen({route}) {
-    return  <Suspense fallback={<ActivityIndicator/>}>
-        <Recipe slug={route.params.slug}></Recipe>
-        </Suspense>
+    return <Suspense fallback={<ActivityIndicator/>}>
+             <Recipe slug={route.params.slug}></Recipe>
+           </Suspense>
 }
 
 function SearchScreen() {
     return (
-            <SafeAreaView>
+            <SafeAreaView style={{flex:1}}>
             <Input />
             <Suspense fallback={<ActivityIndicator/>}>
             <QueryResults/>
