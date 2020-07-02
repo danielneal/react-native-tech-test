@@ -37,7 +37,6 @@ function Recipe({slug}) {
     const recipe=useRecoilValue(recipeState(slug)).recipe
     const dimensions=useWindowDimensions()
     const image=recipe.media.find((img)=>img.height<800 && img.height > 400)
-    console.log(recipe.ingredients);
     return <ScrollView>
         <Text style={{fontSize:style.f3,padding:style.s3}}>{recipe.name}</Text>
         {image && <Image source={{uri:image.uri}} style={{width:dimensions.width,height:dimensions.width}}/>}
