@@ -59,6 +59,14 @@ query recipe($slug: String!) {
        recipe(slug:$slug) {
            id
            introduction
+           ingredients {
+              component
+              ingredients
+           }
+           method {
+              component
+              steps
+           }
            name
            media {
               height
@@ -136,13 +144,23 @@ function QueryResults() {
 }
 
 function Recipe({slug}) {
-    const result=useRecoilValue(recipeState(slug))
+    const recipe=useRecoilValue(recipeState(slug)).recipe
     const dimensions=useWindowDimensions()
-    const image=result.recipe.media.find((img)=>img.height<800 && img.height > 400)
+    const image=recipe.media.find((img)=>img.height<800 && img.height > 400)
+    console.log(recipe.ingredients);
     return <ScrollView>
-        <Text style={{fontSize:style.f3}}>{result.recipe.name}</Text>
+        <Text style={{fontSize:style.f3,padding:style.s3}}>{recipe.name}</Text>
         <Image source={{uri:image.uri}} style={{width:dimensions.width,height:dimensions.width}}/>
-        <Text>{result.recipe.introduction}</Text>
+        <Text style={{padding:style.s3,fontSize:style.f2}}>{recipe.introduction}</Text>
+        {
+            recipe.ingredients.map((entry)=> {
+                return <View>
+                    <Text>{entry.component}</Text>
+                    {entry.ingredients.map((ingredient)=> {return <Text>{ingredient}</Text>}
+                    )}
+                </View>
+            })
+        }
         </ScrollView>
 }
 
