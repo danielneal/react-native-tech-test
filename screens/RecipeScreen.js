@@ -8,7 +8,9 @@ import * as style from "../style"
 import React, { Suspense } from 'react';
 import { recipeState } from "../state"
 import { useRecoilValue } from "recoil"
-import { Ionicons } from '@expo/vector-icons'
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
+import formatDuration from 'date-fns/formatDuration'
+import parseISO from 'date-fns/parseISO'
 
 function RecipeIngredients({recipe}) {
     return recipe.ingredients.map((entry)=> {
@@ -23,22 +25,45 @@ function RecipeMethod({recipe}) {
     return recipe.method.map((entry)=> {
         return <View style={{padding:style.s3}}>
             <Text style={{fontSize:style.f3}}>{entry.component=="main"?"Method":entry.component}</Text>
-            {entry.steps.map((step)=> {return <Text style={{fontSize:style.f2}}>{step}</Text>})}
+            {entry.steps.map((step)=> {return <Text style={{fontSize:style.f2,paddingVertical:style.s3}}>{step}</Text>})}
         </View>
     })
 }
 
 function RecipeIntroduction({recipe}) {
     return <>
-    <Text style={{padding:style.s3,fontSize:style.f3}}>Introduction</Text>
-    <Text style={{padding:style.s3,fontSize:style.f2}}>{recipe.introduction}</Text>
+      <Text style={{padding:style.s3,fontSize:style.f3}}>Introduction</Text>
+      <Text style={{padding:style.s3,fontSize:style.f2}}>{recipe.introduction}</Text>
     </>
+}
+
+function formatISODuration(isoDuration) {
+    let matches = isoDuration.match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
+    if(matches==undefined) {return undefined}
+    let obj = {
+        hours: matches[1],
+        minutes: matches[2]
+    };
+    let text=obj.hours?obj.hours+"h":""+obj.minutes?obj.minutes+"m":"";
+    console.log(text)
+    return text
 }
 
 function RecipeServes ({recipe}) {
     return <View style={{flexDirection:"row",justifyContent:"flex-end",alignItems:"center",padding:style.s3}}>
           <Ionicons name="md-people" size={32} style={{marginRight:style.s3}}/>
           <Text style={{fontSize:style.f2}}>Serves {recipe.serves}</Text>
+        </View>
+}
+
+function RecipeTimes ({recipe}) {
+    const prep_time=formatISODuration(recipe.prep_time)
+    const cook_time=formatISODuration(recipe.cook_time)
+    const total_time=formatISODuration(recipe.cook_time)
+
+    return <View style={{flexDirection:"row",justifyContent:"flex-end",alignItems:"center",padding:style.s3}}>
+        <MaterialCommunityIcons name="clock-outline" size={32} style={{marginRight:style.s3}}/>
+        <Text style={{fontSize:style.f2}}>{prep_time && "Prep "+prep_time} {total_time && "Total " + total_time}</Text>
         </View>
 }
 
@@ -54,6 +79,7 @@ function Recipe({slug}) {
         <RecipeTitle recipe={recipe}/>
         {image && <Image source={{uri:image.uri}} style={{width:dimensions.width,height:dimensions.width}}/>}
         <RecipeServes recipe={recipe}/>
+        <RecipeTimes recipe={recipe}/>
         <RecipeIntroduction recipe={recipe}/>
         <RecipeIngredients recipe={recipe}/>
         <RecipeMethod recipe={recipe}/>
