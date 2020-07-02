@@ -9,7 +9,7 @@ import {
     TouchableOpacity} from 'react-native';
 import React, { Suspense } from 'react';
 import * as style from "../style"
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { textState,hitsState,totalHitsState,resultsPageState} from "../state"
 import { useRecoilState,useRecoilValue } from "recoil"
@@ -26,14 +26,21 @@ function RecipeHit({recipe}) {
         </TouchableOpacity>
 }
 
+const pagerHeight=50
+
 function ResultsPager() {
     const [page, setPage] = useRecoilState(resultsPageState)
     const totalHits = useRecoilValue(totalHitsState)
-    return <View style={{height:200,backgroundColor:"pink",position:"absolute",left:0,bottom:0,flexDirection:"row"}}>
-             <TouchableOpacity onPress={()=>setPage(page-1)}><Text>Prev</Text></TouchableOpacity>
-             <Text>Page {page}</Text>
-             <Text>Showing {page*10} - {Math.min(totalHits,(page+1)*10)} of {totalHits}</Text>
-             <TouchableOpacity onPress={()=>setPage(page+1)}><Text>Next</Text></TouchableOpacity>
+    return <View style={{flexGrow:1,height:pagerHeight,backgroundColor:style.ui4,position:"absolute",right:0,left:0,bottom:0,flexDirection:"row",alignItems:"center",justifyContent:"space-around"}}>
+             <TouchableOpacity onPress={()=>setPage(page-1)} style={{flexDirection:"row",alignItems:"center"}}>
+                 <Ionicons name="ios-arrow-back" size={32} style={{marginRight:style.s4}}/>
+                 <Text style={{fontSize:style.f2}}>Prev</Text>
+             </TouchableOpacity>
+             <Text style={{fontSize:style.f2}}>Showing {(page-1)*10+1} - {Math.min(totalHits,page*10)} of {totalHits}</Text>
+             <TouchableOpacity onPress={()=>setPage(page+1)} style={{flexDirection:"row",alignItems:"center"}}>
+                <Text style={{marginRight:style.s4,fontSize:style.f2}}>Next</Text>
+                <Ionicons name="ios-arrow-forward" size={32}/>
+             </TouchableOpacity>
            </View>
 }
 
@@ -65,7 +72,7 @@ function QueryResults() {
     }
     else {
     return <View style={{flexGrow:1}}>
-            <ScrollView style={{flexGrow:1}}>
+            <ScrollView style={{flexGrow:1,height:0,marginBottom:pagerHeight}}>
               {hits.map((hit)=><RecipeHit recipe={hit.recipe}/>)}
             </ScrollView>
             <ResultsPager/>
