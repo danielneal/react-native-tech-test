@@ -80,17 +80,12 @@ query recipe($slug: String!) {
 function RecipeHit({recipe}) {
     const navigation=useNavigation()
     const image=recipe.media.find((img)=>img.height<150 &&img.height > 50)
-    if(!image) {
-        return <View/>
-    }
-    else {
-        return <TouchableOpacity key={recipe.slug}
+    return <TouchableOpacity key={recipe.slug}
                   style={{padding:style.s3,flexDirection:"row"}}
                   onPress={()=>navigation.navigate('Recipe',{slug:recipe.slug})}>
-            <Image source={{uri:image.uri}} style={{width:style.s7,height:style.s7,marginRight:style.s3}}/>
+            {image && <Image source={{uri:image.uri}} style={{width:style.s7,height:style.s7,marginRight:style.s3}}/>}
             <Text style={{fontSize:style.f3}}>{recipe.name}</Text>
             </TouchableOpacity>
-    }
 }
 
 function Input() {
@@ -143,6 +138,30 @@ function QueryResults() {
     }
 }
 
+function RecipeIngredients({recipe}) {
+    return recipe.ingredients.map((entry)=> {
+        return <View style={{padding:style.s3}}>
+            <Text style={{fontSize:style.f3}}>{entry.component=="main"?"Ingredients":entry.component}</Text>
+            {entry.ingredients.map((ingredient)=> {return <Text style={{fontSize:style.f2}}>{ingredient}</Text>})}
+        </View>
+    })
+}
+
+function RecipeMethod({recipe}) {
+    return recipe.method.map((entry)=> {
+        return <View style={{padding:style.s3}}>
+            <Text style={{fontSize:style.f3}}>{entry.component=="main"?"Method":entry.component}</Text>
+            {entry.steps.map((step)=> {return <Text style={{fontSize:style.f2}}>{step}</Text>})}
+        </View>
+    })
+}
+
+function RecipeIntroduction({recipe}) {
+    return <>
+    <Text style={{padding:style.s3,fontSize:style.f3}}>Introduction</Text>
+    <Text style={{padding:style.s3,fontSize:style.f2}}>{recipe.introduction}</Text>
+    </>
+}
 function Recipe({slug}) {
     const recipe=useRecoilValue(recipeState(slug)).recipe
     const dimensions=useWindowDimensions()
@@ -150,17 +169,10 @@ function Recipe({slug}) {
     console.log(recipe.ingredients);
     return <ScrollView>
         <Text style={{fontSize:style.f3,padding:style.s3}}>{recipe.name}</Text>
-        <Image source={{uri:image.uri}} style={{width:dimensions.width,height:dimensions.width}}/>
-        <Text style={{padding:style.s3,fontSize:style.f2}}>{recipe.introduction}</Text>
-        {
-            recipe.ingredients.map((entry)=> {
-                return <View>
-                    <Text>{entry.component}</Text>
-                    {entry.ingredients.map((ingredient)=> {return <Text>{ingredient}</Text>}
-                    )}
-                </View>
-            })
-        }
+        {image && <Image source={{uri:image.uri}} style={{width:dimensions.width,height:dimensions.width}}/>}
+        <RecipeIntroduction recipe={recipe}/>
+        <RecipeIngredients recipe={recipe}/>
+        <RecipeMethod recipe={recipe}/>
         </ScrollView>
 }
 
