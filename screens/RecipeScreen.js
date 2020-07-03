@@ -72,27 +72,26 @@ function RecipeTitle({recipe}) {
 
 }
 
-function RecipeImagePortrait({recipe}) {
-    const image=recipe.media.find((img)=>img.height<800 && img.height > 400)
+function RecipeImagePortrait({image}) {
     const dimensions=useWindowDimensions()
-    return image && <Image source={{uri:image.uri}} style={{width:dimensions.width,height:dimensions.width}}/>
+    return <Image source={{uri:image.uri}} style={{width:dimensions.width,height:dimensions.width}}/>
 }
 
-function RecipeImageLandscape({recipe}) {
-    const image=recipe.media.find((img)=>img.height<800 && img.height > 400)
+function RecipeImageLandscape({image}) {
     const dimensions=useWindowDimensions()
-    return image && <Image source={{uri:image.uri}} style={{padding:style.s4,width:dimensions.width/2,height:dimensions.width/2}}/>
+    return <Image source={{uri:image.uri}} style={{padding:style.s4,width:dimensions.width/2,height:dimensions.width/2}}/>
 }
 
 function Recipe({slug}) {
     const recipe=useRecoilValue(recipeState(slug)).recipe
     const deviceOrientation = useDeviceOrientation();
+    const image=recipe.media.find((img)=>img.height<800 && img.height > 400)
     console.log(deviceOrientation)
     if(deviceOrientation==="portrait")
     {
         return <ScrollView>
             <RecipeTitle recipe={recipe}/>
-            <RecipeImagePortrait recipe={recipe}/>
+            {image && <RecipeImagePortrait image={image}/>}
             <RecipeServes recipe={recipe}/>
             <RecipeTimes recipe={recipe}/>
             <RecipeIntroduction recipe={recipe}/>
@@ -102,15 +101,14 @@ function Recipe({slug}) {
     } else {
         return <ScrollView>
             <RecipeTitle recipe={recipe}/>
-
             <View style={{flexDirection:"row"}}>
             <View style={{flex:1,justifyContent:"flex-end"}}>
               <RecipeServes recipe={recipe}/>
               <RecipeTimes recipe={recipe}/>
             </View>
-            <View style={{flex:1}}>
-            <RecipeImageLandscape recipe={recipe}/>
-            </View>
+            {image &&<View style={{flex:1}}>
+             <RecipeImageLandscape image={image}/>
+            </View>}
             </View>
             <RecipeIntroduction recipe={recipe}/>
             <RecipeIngredients recipe={recipe}/>
