@@ -45,7 +45,6 @@ function formatISODuration(isoDuration) {
         minutes: matches[2]
     };
     let text=obj.hours?obj.hours+"h":""+obj.minutes?obj.minutes+"m":"";
-    console.log(text)
     return text
 }
 
