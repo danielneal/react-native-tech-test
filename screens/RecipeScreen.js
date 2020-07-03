@@ -6,7 +6,7 @@ import { Text,
     Image} from 'react-native';
 import * as style from "../style"
 import React, { Suspense } from 'react';
-import { recipeState, screenOrientationState } from "../state"
+import { recipeState, screenOrientationState, deviceTypeState } from "../state"
 import { useRecoilValue } from "recoil"
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 import formatDuration from 'date-fns/formatDuration'
@@ -17,7 +17,7 @@ function RecipeIngredients({recipe}) {
     return recipe.ingredients.map((entry,key)=> {
         return <View style={{padding:style.s3}} key={key}>
             <Text style={{fontSize:style.f3}}>{entry.component=="main"?"Ingredients":entry.component}</Text>
-            {entry.ingredients.map((ingredient)=> {return <Text style={{fontSize:style.f2}}>{ingredient}</Text>})}
+            {entry.ingredients.map((ingredient,key)=> {return <Text key={key} style={{fontSize:style.f2}}>{ingredient}</Text>})}
         </View>
     })
 }
@@ -26,7 +26,7 @@ function RecipeMethod({recipe}) {
     return recipe.method.map((entry,key)=> {
         return <View style={{padding:style.s3}} key={key}>
             <Text style={{fontSize:style.f3}}>{entry.component=="main"?"Method":entry.component}</Text>
-            {entry.steps.map((step)=> {return <Text style={{fontSize:style.f2,paddingVertical:style.s3}}>{step}</Text>})}
+            {entry.steps.map((step,key)=> {return <Text key={key} style={{fontSize:style.f2,paddingVertical:style.s3}}>{step}</Text>})}
         </View>
     })
 }
@@ -86,8 +86,7 @@ function Recipe({slug}) {
     const recipe=useRecoilValue(recipeState(slug)).recipe
     const deviceOrientation = useDeviceOrientation();
     const image=recipe.media.find((img)=>img.height<800 && img.height > 400)
-    console.log(deviceOrientation)
-    if(deviceOrientation==="portrait")
+    if(deviceOrientation==="portrait" )
     {
         return <ScrollView>
             <RecipeTitle recipe={recipe}/>

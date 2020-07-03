@@ -7,6 +7,9 @@ export const s5=16
 export const s6=32
 export const s7=64
 export const s8=128
+export const s9=256
+export const s10=384
+export const s11=512
 
 //colors
 export const ui1="#333333"

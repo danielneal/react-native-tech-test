@@ -4,7 +4,7 @@ import {
    selectorFamily
 } from 'recoil';
 import { request } from 'graphql-request'
-
+import * as Device from 'expo-device';
 const endpoint = "https://next.riverford.co.uk/graphql"
 
 const searchQuery = /* GraphQL */ `
@@ -66,12 +66,14 @@ export const resultsPageState = atom({
     default:1
 })
 
+export const pageSize=30
+
 export const resultsState = selector({
     key:`resultsState`,
     get: async ({get}) => {
         const text = get(textState)
         const page = get(resultsPageState)
-        const results=await request(endpoint,searchQuery, {q:text,page_size:10,page:page})
+        const results=await request(endpoint,searchQuery, {q:text,page_size:pageSize,page:page})
         return results
     }
 })
@@ -98,5 +100,12 @@ export const recipeState = selectorFamily({
         const result=await request(endpoint,recipeQuery,{slug:slug});
         return result;
     },
-
 });
+
+export const deviceTypeState = selector({
+    key:`deviceTypeState`,
+    get: async ({get}) => {
+        let device=await Device.getDeviceTypeAsync()
+        return device
+    }
+})

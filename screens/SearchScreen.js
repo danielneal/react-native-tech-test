@@ -4,6 +4,7 @@ import {
     View,
     ActivityIndicator,
     ScrollView,
+    FlatList,
     Image,
     TextInput,
     TouchableOpacity} from 'react-native';
@@ -11,18 +12,19 @@ import React, { Suspense } from 'react';
 import * as style from "../style"
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { textState,hitsState,totalHitsState,resultsPageState} from "../state"
+import { deviceTypeState,textState,hitsState,totalHitsState,resultsPageState, pageSize } from "../state"
 import { useRecoilState,useRecoilValue } from "recoil"
+import * as Device from 'expo-device';
 
 function RecipeHit({recipe}) {
     const navigation=useNavigation()
     const image=recipe.media.find((img)=>img.height<150 &&img.height > 50)
     return <TouchableOpacity key={recipe.slug}
-    style={{padding:style.s3,flexDirection:"row"}}
+    style={{padding:style.s3,flexDirection:"row",flex:1}}
     onPress={()=>navigation.navigate('Recipe',{slug:recipe.slug})}>
         {image? <Image source={{uri:image.uri}} style={{width:style.s7,height:style.s7,marginRight:style.s3}}/>:
         <View style={{width:style.s7,height:style.s7,backgroundColor:style.ui3,marginRight:style.s3}}/>}
-        <Text style={{fontSize:style.f3,width:0,flexGrow:1}}>{recipe.name}</Text>
+        <Text style={{fontSize:style.f3,flexGrow:1,flexShrink:1}}>{recipe.name}</Text>
         </TouchableOpacity>
 }
 
@@ -36,7 +38,7 @@ function ResultsPager() {
                  <Ionicons name="ios-arrow-back" size={32} style={{marginRight:style.s4}}/>
                  <Text style={{fontSize:style.f2}}>Prev</Text>
              </TouchableOpacity>
-             <Text style={{fontSize:style.f2}}>Showing {(page-1)*10+1} - {Math.min(totalHits,page*10)} of {totalHits}</Text>
+             <Text style={{fontSize:style.f2}}>Showing {(page-1)*pageSize+1} - {Math.min(totalHits,page*pageSize)} of {totalHits}</Text>
              <TouchableOpacity onPress={()=>setPage(page+1)} style={{flexDirection:"row",alignItems:"center"}}>
                 <Text style={{marginRight:style.s4,fontSize:style.f2}}>Next</Text>
                 <Ionicons name="ios-arrow-forward" size={32}/>
@@ -67,14 +69,17 @@ function QueryEmptyState() {
 function QueryResults() {
     const hits=useRecoilValue(hitsState)
     const text=useRecoilValue(textState)
+    const deviceType=useRecoilValue(deviceTypeState)
     if(text==="") {
         return <QueryEmptyState/>
     }
     else {
     return <View style={{flexGrow:1}}>
-            <ScrollView style={{flexGrow:1,height:0,marginBottom:pagerHeight}}>
-              {hits.map((hit)=><RecipeHit recipe={hit.recipe}/>)}
-            </ScrollView>
+            <FlatList style={{flexGrow:1,height:0,marginBottom:pagerHeight}}
+               data={hits}
+               keyExtractor={item => item.recipe.id}
+               numColumns={deviceType===Device.DeviceType.PHONE?1:2}
+               renderItem={({item})=><RecipeHit recipe={item.recipe}/>}/>
             <ResultsPager/>
            </View>
     }
