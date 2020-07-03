@@ -6,15 +6,16 @@ import { Text,
     Image} from 'react-native';
 import * as style from "../style"
 import React, { Suspense } from 'react';
-import { recipeState } from "../state"
+import { recipeState, screenOrientationState } from "../state"
 import { useRecoilValue } from "recoil"
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 import formatDuration from 'date-fns/formatDuration'
 import parseISO from 'date-fns/parseISO'
+import useDeviceOrientation from '@rnhooks/device-orientation';
 
 function RecipeIngredients({recipe}) {
-    return recipe.ingredients.map((entry)=> {
-        return <View style={{padding:style.s3}}>
+    return recipe.ingredients.map((entry,key)=> {
+        return <View style={{padding:style.s3}} key={key}>
             <Text style={{fontSize:style.f3}}>{entry.component=="main"?"Ingredients":entry.component}</Text>
             {entry.ingredients.map((ingredient)=> {return <Text style={{fontSize:style.f2}}>{ingredient}</Text>})}
         </View>
@@ -22,8 +23,8 @@ function RecipeIngredients({recipe}) {
 }
 
 function RecipeMethod({recipe}) {
-    return recipe.method.map((entry)=> {
-        return <View style={{padding:style.s3}}>
+    return recipe.method.map((entry,key)=> {
+        return <View style={{padding:style.s3}} key={key}>
             <Text style={{fontSize:style.f3}}>{entry.component=="main"?"Method":entry.component}</Text>
             {entry.steps.map((step)=> {return <Text style={{fontSize:style.f2,paddingVertical:style.s3}}>{step}</Text>})}
         </View>
@@ -70,19 +71,52 @@ function RecipeTitle({recipe}) {
    return <Text style={{textAlign:"center",fontWeight:"bold",fontSize:style.f3,padding:style.s4}}>{recipe.name}</Text>
 
 }
+
+function RecipeImagePortrait({recipe}) {
+    const image=recipe.media.find((img)=>img.height<800 && img.height > 400)
+    const dimensions=useWindowDimensions()
+    return image && <Image source={{uri:image.uri}} style={{width:dimensions.width,height:dimensions.width}}/>
+}
+
+function RecipeImageLandscape({recipe}) {
+    const image=recipe.media.find((img)=>img.height<800 && img.height > 400)
+    const dimensions=useWindowDimensions()
+    return image && <Image source={{uri:image.uri}} style={{padding:style.s4,width:dimensions.width/2,height:dimensions.width/2}}/>
+}
+
 function Recipe({slug}) {
     const recipe=useRecoilValue(recipeState(slug)).recipe
-    const dimensions=useWindowDimensions()
-    const image=recipe.media.find((img)=>img.height<800 && img.height > 400)
-    return <ScrollView>
-        <RecipeTitle recipe={recipe}/>
-        {image && <Image source={{uri:image.uri}} style={{width:dimensions.width,height:dimensions.width}}/>}
-        <RecipeServes recipe={recipe}/>
-        <RecipeTimes recipe={recipe}/>
-        <RecipeIntroduction recipe={recipe}/>
-        <RecipeIngredients recipe={recipe}/>
-        <RecipeMethod recipe={recipe}/>
-        </ScrollView>
+    const deviceOrientation = useDeviceOrientation();
+    console.log(deviceOrientation)
+    if(deviceOrientation==="portrait")
+    {
+        return <ScrollView>
+            <RecipeTitle recipe={recipe}/>
+            <RecipeImagePortrait recipe={recipe}/>
+            <RecipeServes recipe={recipe}/>
+            <RecipeTimes recipe={recipe}/>
+            <RecipeIntroduction recipe={recipe}/>
+            <RecipeIngredients recipe={recipe}/>
+            <RecipeMethod recipe={recipe}/>
+            </ScrollView>
+    } else {
+        return <ScrollView>
+            <RecipeTitle recipe={recipe}/>
+
+            <View style={{flexDirection:"row"}}>
+            <View style={{flex:1,justifyContent:"flex-end"}}>
+              <RecipeServes recipe={recipe}/>
+              <RecipeTimes recipe={recipe}/>
+            </View>
+            <View style={{flex:1}}>
+            <RecipeImageLandscape recipe={recipe}/>
+            </View>
+            </View>
+            <RecipeIntroduction recipe={recipe}/>
+            <RecipeIngredients recipe={recipe}/>
+            <RecipeMethod recipe={recipe}/>
+            </ScrollView>
+    }
 }
 
 export default function RecipeScreen({route}) {
