@@ -1,8 +1,8 @@
 ## JS technical test
 
-Dependencies: expo
-yarn global add expo
-yarn install
+## Dependencies
+ * yarn global add expo
+ * yarn install
 
-To run:
+## To run
 yarn start
