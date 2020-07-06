@@ -105,7 +105,7 @@ function Recipe({slug}) {
               <RecipeServes recipe={recipe}/>
               <RecipeTimes recipe={recipe}/>
             </View>
-            {image &&<View style={{flex:1}}>
+            {image && <View style={{flex:1}}>
              <RecipeImageLandscape image={image}/>
             </View>}
             </View>

@@ -48,8 +48,10 @@ function ResultsPager() {
 
 function Input() {
     const [text, setText] = useRecoilState(textState);
+    const [page, setPage] = useRecoilState(resultsPageState)
     const onChange = (text) => {
         setText(text);
+        setPage(1);
     };
 
     return (
